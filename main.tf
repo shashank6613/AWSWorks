@@ -113,7 +113,7 @@ resource "aws_instance" "public" {
   instance_type = "t2.micro"
   key_name      = "north.pem"
   subnet_id     = aws_subnet.public.id
-  security_group = aws_security_group.public_sg.id
+  security_groups = [aws_security_group.public_sg.id]
   user_data = <<-EOF
               #!/bin/bash
               apt-get update
@@ -133,7 +133,7 @@ resource "aws_instance" "private" {
   instance_type = "t2.micro"
   key_name      = "north.pem"
   subnet_id     = aws_subnet.private.id
-  security_group = aws_security_group.private_sg.id
+  security_groups = [aws_security_group.private_sg.id]
 
   tags = {
     Name = "private_instance"
