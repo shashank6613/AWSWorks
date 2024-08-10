@@ -111,7 +111,7 @@ resource "aws_security_group" "private_sg" {
 resource "aws_instance" "public" {
   ami           = "ami-0a0e5d9c7acc336f1" # Ubuntu 22.04 LTS
   instance_type = "t2.micro"
-  key_name      = "north.pem"
+  key_name      = "north"
   subnet_id     = aws_subnet.public.id
   security_groups = [aws_security_group.public_sg.id]
   user_data = <<-EOF
@@ -131,7 +131,7 @@ resource "aws_instance" "public" {
 resource "aws_instance" "private" {
   ami           = "ami-0a0e5d9c7acc336f1" # Ubuntu 22.04 LTS
   instance_type = "t2.micro"
-  key_name      = "north.pem"
+  key_name      = "north"
   subnet_id     = aws_subnet.private.id
   security_groups = [aws_security_group.private_sg.id]
 
