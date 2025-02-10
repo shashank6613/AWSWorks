@@ -1,0 +1,88 @@
+---
+- name: Install Jenkins, Java 17, and Python on Jenkins-Master, Kubernetes-Master, and Kubernetes-Slave EC2 instances
+  hosts: all
+  become: yes
+  tasks:
+
+    - name: Update apt package list
+      apt:
+        update_cache: yes
+      become: yes
+
+    - name: Ensure universe repository is enabled
+      apt_repository:
+        repo: 'deb http://archive.ubuntu.com/ubuntu/ {{ ansible_distribution_release | lower }} universe'
+        state: present
+      become: yes
+
+    # Install Java 17 (JRE) on all instances
+    - name: Install Java 17 (JRE) on all instances
+      apt:
+        name: openjdk-17-jdk
+        state: present
+      when: inventory_hostname in ['Jenkins-Master', 'Kubernetes-Master', 'Kubernetes-Slave']
+
+    # Install Python 3 and pip3 on all instances
+    - name: Install Python 3 on all instances
+      apt:
+        name: python3
+        state: present
+      when: inventory_hostname in ['Jenkins-Master', 'Kubernetes-Master', 'Kubernetes-Slave']
+
+    - name: Install pip3 on all instances
+      apt:
+        name: python3-pip
+        state: present
+      when: inventory_hostname in ['Jenkins-Master', 'Kubernetes-Master', 'Kubernetes-Slave']
+
+    # Jenkins installation (only on Jenkins-Master)
+    - name: Install Jenkins dependencies on Jenkins-Master
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+      when: inventory_hostname == 'Jenkins-Master'
+
+    - name: Add Jenkins key on Jenkins-Master
+      apt_key:
+        url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+        state: present
+      when: inventory_hostname == 'Jenkins-Master'
+
+    - name: Add Jenkins repository on Jenkins-Master
+      apt_repository:
+        repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+        state: present
+      when: inventory_hostname == 'Jenkins-Master'
+
+    - name: Update apt package list
+      apt:
+        update_cache: yes
+      become: yes
+
+    - name: Install Jenkins on Jenkins-Master
+      apt:
+        name: jenkins
+        state: present
+      when: inventory_hostname == 'Jenkins-Master'
+
+    - name: Start Jenkins service on Jenkins-Master
+      service:
+        name: jenkins
+        state: started
+        enabled: yes
+      when: inventory_hostname == 'Jenkins-Master'
+
+    # Ensure Java 17 is installed (for verification)
+    - name: Ensure Java 17 is installed
+      debug:
+        msg: "Java 17 is installed on {{ inventory_hostname }}"
+
+    # Ensure Python is installed (for verification)
+    - name: Ensure Python is installed
+      debug:
+        msg: "Python is installed on {{ inventory_hostname }}"
